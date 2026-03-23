@@ -17,4 +17,4 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
-    test_field: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
+    test_field2: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
