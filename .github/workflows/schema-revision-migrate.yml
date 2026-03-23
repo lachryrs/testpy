@@ -1,0 +1,87 @@
+name: schema-revision-migrate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: myuser
+          POSTGRES_PASSWORD: mypassword
+          POSTGRES_DB: mydb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Bring DB to current schema state
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: |
+          uv run --package migrations \
+            alembic -c migrations/alembic.ini upgrade head
+
+      - name: Check if models changed
+        id: models_changed
+        run: |
+          CHANGED=$(git diff origin/main --name-only | grep "api/app/models.py" || true)
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+
+      - name: Autogenerate migration if models changed
+        if: steps.models_changed.outputs.changed != ''
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: |
+          uv run --package migrations \
+            alembic -c migrations/alembic.ini revision --autogenerate -m "ci_generated"
+
+      - name: Check migration was committed if models changed
+        if: steps.models_changed.outputs.changed != ''
+        run: |
+          NEW=$(git status --porcelain migrations/alembic/versions/)
+          if [ -n "$NEW" ]; then
+            echo "❌ models.py changed but migration file is missing or doesn't match."
+            echo "   Run: make revision msg='describe_your_change' and commit the result."
+            exit 1
+          fi
+
+      - name: Apply new migration
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: |
+          uv run --package migrations \
+            alembic -c migrations/alembic.ini upgrade head
+
+      - name: Test downgrade works
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: |
+          uv run --package migrations \
+            alembic -c migrations/alembic.ini downgrade -1
+          uv run --package migrations \
+            alembic -c migrations/alembic.ini upgrade head
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: uv run pytest api/tests/
