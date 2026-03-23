@@ -9,4 +9,5 @@ wheels/
 # Virtual environments
 .venv
 
+# Dev reqs
 .ruff_cache
