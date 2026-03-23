@@ -1,0 +1,29 @@
+base_route: /users
+query:
+  - name: Return all users
+    summary: Get all users
+    method: GET
+    sql: >
+      SELECT * FROM users
+    response_fields:
+      - name: name
+        type: string
+
+  - name: Return specific user
+    path: /{user_id}
+    summary: Get a single user
+    method: GETs
+    sql: >
+      SELECT * FROM users WHERE id = :user_id
+    path_params:
+      - name: user_id
+        type: int
+
+  - name: Return all users
+    summary: Get all users
+    method: GET
+    sql: >
+      SELECT * FROM users
+    response_fields:
+      - name: name
+        type: string
