@@ -4,8 +4,8 @@ from sqlalchemy.sql import func
 from api.app.database import Base
 
 
-class User2(Base):
-    __tablename__ = "users"
+class User(Base):
+    __tablename__ = "users2"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
