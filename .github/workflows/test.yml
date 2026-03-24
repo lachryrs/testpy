@@ -1,0 +1,51 @@
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      head_ref:
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: myuser
+          POSTGRES_PASSWORD: mypassword
+          POSTGRES_DB: mydb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.head_ref }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync --frozen --all-groups
+
+      - name: Apply migrations
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: |
+          uv run --package migrations \
+            alembic -c migrations/alembic.ini upgrade head
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
+        run: uv run pytest api/tests/
