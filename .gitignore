@@ -1,1 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+
+# Env
+.env
+.env.*
+
+# DB
+pgdata/
+
+# OS
 .DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Dev
+.ruff_cache
