@@ -18,4 +18,4 @@ class User(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     test_field2: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
-    test_field3: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
+    test_field4: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
