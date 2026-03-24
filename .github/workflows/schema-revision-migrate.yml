@@ -43,9 +43,18 @@ jobs:
         run: |
           uv run --package migrations \
             alembic -c migrations/alembic.ini downgrade base
+
+          MARKER="pr_${{ github.event.pull_request.number }}"
+          EXISTING=$(grep -rl "revision_marker: $MARKER" migrations/alembic/versions/ 2>/dev/null || true)
+          if [ -n "$EXISTING" ]; then
+            echo "Removing stale PR migration before reset: $EXISTING"
+            rm "$EXISTING"
+          fi
+
           git checkout origin/main -- migrations/alembic/versions/
           uv run --package migrations \
             alembic -c migrations/alembic.ini upgrade head
+
           git checkout ${{ github.head_ref }} -- migrations/alembic/versions/
 
       - name: Check if models changed
