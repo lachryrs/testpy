@@ -8,9 +8,7 @@ jobs:
   test:
     if: |
       github.event.issue.pull_request &&
-      github.event.comment.body == 'BUILD' &&
-      (github.event.comment.user.login == 'jake' ||
-       github.event.comment.user.login == 'github-actions[bot]')
+      github.event.comment.body == 'BUILD'
 
     runs-on: ubuntu-latest
     permissions:
