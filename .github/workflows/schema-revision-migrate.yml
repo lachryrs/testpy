@@ -1,11 +1,13 @@
 name: schema-revision-migrate
 
 on:
-  pull_request:
-    branches: [main]
+  issue_comment:
+    types: [created]
 
 jobs:
   test:
+    if: toJson(github.event.issue.pull_request) != 'null' && github.event.comment.body == 'BUILD'
+
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -35,14 +37,27 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --all-groups
 
-      - name: Bring DB to current schema state
+      - name: Bring DB to main branch schema state
         env:
           DATABASE_URL: postgresql://myuser:mypassword@localhost:5432/mydb
         run: |
           uv run --package migrations \
+            alembic -c migrations/alembic.ini downgrade base
+
+          MARKER="pr_${{ github.event.pull_request.number }}"
+          EXISTING=$(grep -rl "revision_marker: $MARKER" migrations/alembic/versions/ 2>/dev/null || true)
+          if [ -n "$EXISTING" ]; then
+            echo "Removing stale PR migration before reset: $EXISTING"
+            rm "$EXISTING"
+          fi
+
+          git checkout origin/main -- migrations/alembic/versions/
+          uv run --package migrations \
             alembic -c migrations/alembic.ini upgrade head
+
+          git checkout ${{ github.head_ref }} -- migrations/alembic/versions/
 
       - name: Check if models changed
         id: models_changed
