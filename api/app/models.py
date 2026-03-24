@@ -5,7 +5,7 @@ from api.app.database import Base
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "users2"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
@@ -18,4 +18,4 @@ class User(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
     test_field2: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
-    test_field33: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
+    test_field32: Mapped[str] = mapped_column(String(255), nullable=False, unique=False, index=False)
