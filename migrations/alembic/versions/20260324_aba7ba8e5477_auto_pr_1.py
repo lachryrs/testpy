@@ -1,9 +1,9 @@
 # revision_marker: pr_1
 """auto_pr_1
 
-Revision ID: 721c44e2927a
+Revision ID: aba7ba8e5477
 Revises: 1cd3b04277c8
-Create Date: 2026-03-24 00:06:51.399806
+Create Date: 2026-03-24 00:12:15.234302
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '721c44e2927a'
+revision: str = 'aba7ba8e5477'
 down_revision: Union[str, Sequence[str], None] = '1cd3b04277c8'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
