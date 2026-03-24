@@ -1,11 +1,17 @@
 name: schema-revision-migrate
 
 on:
-  pull_request:
-    branches: [main]
+  issue_comment:
+    types: [created]
 
 jobs:
   test:
+    if: |
+      github.event.issue.pull_request &&
+      github.event.comment.body == 'BUILD' &&
+      (github.event.comment.user.login == 'jake' ||
+       github.event.comment.user.login == 'github-actions[bot]')
+
     runs-on: ubuntu-latest
     permissions:
       contents: write
